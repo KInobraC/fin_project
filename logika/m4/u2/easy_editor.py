@@ -8,16 +8,12 @@ from PyQt5.QtWidgets import (
     QPushButton, QListWidget, QHBoxLayout, QVBoxLayout
 )
 
-#from PIL import Image, ImageFilter
-#from PIL.ImageQt import ImageQt  # Для перенесення графіки з Pillow до QT
-#from PIL.ImageFilter import SHARPEN
-
-
+from PIL import Image, ImageFilter
+# from PIL.ImageQt import ImageQt
+from PIL.ImageFilter import SHARPEN
 
 app = QApplication([])
 main_window = QWidget()
-
-
 
 button_folder = QPushButton("Папка")
 button_left = QPushButton("Вліво")
@@ -28,24 +24,16 @@ button_bw = QPushButton("Ч.Б")
 
 lst_files = QListWidget()
 
-image = "132.jpg"
-kat = QPixmap(image)
-
+# image = "2824384.jpg"
+# kat = QPixmap(image)
 
 Photo = QLabel(main_window)
-Photo.setPixmap(kat)
-
-
-
-
-
-
+# Photo.setPixmap(kat)
 
 layouth1 = QHBoxLayout()
 layoutv1 = QVBoxLayout()
 layouth2 = QHBoxLayout()
 layoutv2 = QVBoxLayout()
-
 
 layoutv1.addWidget(button_folder)
 layoutv1.addWidget(lst_files)
@@ -62,10 +50,6 @@ layouth2.addLayout(layoutv1, 1)
 layouth2.addLayout(layoutv2, 4)
 
 
-
-workdir = QFileDialog.getExistingDirectory()
-
-files_and_folders = os.listdir(workdir)
 def filter(files):
     result = []
     ext = ['jpg', 'jpeg', 'bmp', 'gif', 'jfif', 'svg', 'png']
@@ -77,16 +61,50 @@ def filter(files):
     return result
 
 
+def showFiles():
+    global workdir
 
-filter(files_and_folders)
+    workdir = QFileDialog.getExistingDirectory()
+
+    files_and_folders = os.listdir(workdir)
+    filtered_img = filter(files_and_folders)
+
+    lst_files.clear()
+    lst_files.addItems(filtered_img)
 
 
+class ImageProcescor():
+    def __init__(self):
+        self.filename = None
+        self.original = None
+        self.save_dir = "Modified/"
+
+    def loadImage(self, filename):
+        self.filename = filename
+
+        file_path = os.path.join(workdir, filename)
+
+        self.original = Image.open(file_path)
+
+    def show_image(self, path):
+        Photo.hide()
+
+        pixmapimage = QPixmap(path)
+        w, h = Photo.width(), Photo.height()
+
+        pixmapimage = pixmapimage.scaled(w, h, Qt.KeepAspectRatio)
+
+        Photo.setPixmap(pixmapimage)
+
+        Photo.show()
+
+
+
+workimage = ImageProcescor()
 
 
 
 main_window.setLayout(layouth2)
-
-
 
 main_window.show()
 app.exec_()
