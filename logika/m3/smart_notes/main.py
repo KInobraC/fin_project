@@ -13,7 +13,10 @@ def writeToFile():
 
 app = QApplication([])
 window = QWidget()
+window.setWindowTitle("Notes 7")
 
+
+window.setStyleSheet("background-color: #DBD582;")
 field_text = QTextEdit()
 lb_notes = QLabel("Список заміток")
 lst_notes = QListWidget()
