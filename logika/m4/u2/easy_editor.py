@@ -18,7 +18,7 @@ button_right = QPushButton("Вправо↺")
 button_flip = QPushButton("Дзеркало🔁")
 button_bw = QPushButton("Ч.Б")
 button_sharp = QPushButton("Шарп")
-
+button_flip_top_botom = QPushButton("Верхнє дзеркало")
 
 lst_files = QListWidget()
 
@@ -29,7 +29,8 @@ layoutv1 = QVBoxLayout()
 layouth2 = QHBoxLayout()
 layoutv2 = QVBoxLayout()
 
-layoutv1.addWidget(button_sharp)
+layouth1.addWidget(button_flip_top_botom)
+layouth1.addWidget(button_sharp)
 layoutv1.addWidget(button_folder)
 layoutv1.addWidget(lst_files)
 layouth1.addWidget(button_right)
@@ -100,7 +101,7 @@ class ImageProcescor():
 
         image_path = os.path.join(path, self.filename)
         self.original.save(image_path)
-        self.show_image(path)
+        self.show_image(image_path)
 
     def do_bw(self):
         self.original = self.original.convert("L")
@@ -120,6 +121,10 @@ class ImageProcescor():
 
     def do_sharp(self):
         self.original = self.original.filter(ImageFilter.SHARPEN)
+        self.saveAndShow()
+
+    def do_upflip(self):
+        self.original = self.original.transpose(Image.FLIP_TOP_BOTTOM)
         self.saveAndShow()
 def chooseItem():
     filename = lst_files.currentItem().text()
@@ -141,7 +146,7 @@ button_right.clicked.connect(workimage.do_right)
 button_flip.clicked.connect(workimage.do_flip)
 button_sharp.clicked.connect(workimage.do_sharp)
 button_bw.clicked.connect(workimage.do_bw)
-
+button_flip_top_botom.clicked.connect(workimage.do_upflip)
 
 
 

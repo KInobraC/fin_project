@@ -13,16 +13,16 @@ def writeToFile():
 
 app = QApplication([])
 window = QWidget()
-window.setWindowTitle("Notes 7")
+window.setWindowTitle("Notes 7 ")
 
 
 window.setStyleSheet("background-color: #DBD582;")
 field_text = QTextEdit()
 lb_notes = QLabel("Список заміток")
 lst_notes = QListWidget()
-btn_note_create = QPushButton("Стровити замітку")
+btn_note_create = QPushButton("Стровити замітку📤")
 btn_note_del = QPushButton("Видалити замітку")
-btn_note_save = QPushButton("Зберегти замітку")
+btn_note_save = QPushButton("Зберегти замітку📥")
 
 lb_tags = QLabel("Список тегів")
 
