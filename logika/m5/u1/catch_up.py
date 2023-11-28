@@ -1,5 +1,5 @@
 from pygame import *
-
+mixer.init()
 
 window = display.set_mode((700, 500))
 
