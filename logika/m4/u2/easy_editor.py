@@ -146,7 +146,7 @@ button_right.clicked.connect(workimage.do_right)
 button_flip.clicked.connect(workimage.do_flip)
 button_sharp.clicked.connect(workimage.do_sharp)
 button_bw.clicked.connect(workimage.do_bw)
-button_flip_top_botom.clicked.connect(workimage.do_upflipіва)
+button_flip_top_botom.clicked.connect(workimage.do_upflip)
 
 
 
