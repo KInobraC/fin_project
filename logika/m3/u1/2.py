@@ -1,18 +1,19 @@
-class Students():
-    def __init__(self, surname, name, grade):
-        self.surname = surname
-        self.name = name
-        self.grade = grade
+from tkinter import *
+from datetime import datetime
 
+def clock():
+    now = datetime.now()
+    lab.config(text=str(now.hour)+':'+str(now.minute)+':'+str(now.second))
+    color = ["red", 'green', 'yellow', 'white', 'grey']
+    root.config(bg=color[now.second%5])
+    root.after(1000, clock)
 
-students = []
+root = Tk()
+root.geometry('200x100')
+root.title("godinik")
 
-with open('1.txt', 'r', encoding='utf-8') as file:
-    for line in file:
-        data = line.split(" ")
-        obj = Students(data[0], data[1], int(data[2]))
-        students.append(obj)
+lab = Label(root, text="Hello world", font='Arial 18', bg='blue', fg="yellow")
+lab.pack(pady=30)
 
-for n in students:
-    if n.grade == 5:
-        print(n.surname)
+clock()
+root.mainloop()
