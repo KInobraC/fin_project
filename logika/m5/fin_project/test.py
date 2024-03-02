@@ -3,6 +3,7 @@ from pygame.locals import *
 from pygame.sprite import Sprite
 from pygame.transform import scale, rotate
 from pygame.image import load
+import math
 import random
 
 pygame.init()
@@ -28,17 +29,18 @@ class GameSprite(Sprite):
         self.gravity = 0.5
         self.on_ground = True
         self.jump_count = 0
+        self.down_jump_available = False
 
     def reset(self):
         window.blit(self.image, (self.rect.x, self.rect.y))
 
     def jump(self):
         if self.on_ground:
-            self.jump_speed = -15  # Increase jump height
+            self.jump_speed = -10  # Increase jump height
             self.on_ground = False
             self.jump_count = 1
         elif self.jump_count < 2:
-            self.jump_speed = -15  # Increase jump height
+            self.jump_speed = -7  # Increase jump height
             self.jump_count += 1
 
     def apply_gravity(self):
@@ -58,6 +60,7 @@ class Enemy(GameSprite):
         self.disabled_timer = 0
         self.disabled = False
         self.hitbox = pygame.Rect(rect_x, rect_y, enemy_width, enemy_height)
+        self.initial_y = rect_y  # Store the initial y position for reference
 
     def update(self):
         if not self.disabled:
@@ -69,6 +72,11 @@ class Enemy(GameSprite):
             if pygame.time.get_ticks() - self.disabled_timer >= self.disabled_time:
                 self.disabled = False
                 self.disabled_timer = 0
+
+        # Add movement pattern here
+        # For example, oscillating movement
+        # You can modify this pattern to fit your game's needs
+        self.rect.y = self.initial_y + 50 * math.sin(pygame.time.get_ticks() / 1000)  # Example of oscillating movement
 
 
 class Slash(GameSprite):
@@ -104,20 +112,10 @@ class Slash(GameSprite):
             self.kill()
 
 
-class Tidehunter(GameSprite):
-    def __init__(self, stand_image, rect_x, rect_y, stand_width, stand_height):
-        super().__init__(stand_image, rect_x, rect_y, 0, stand_width, stand_height)
-        self.hitbox = pygame.Rect(rect_x, rect_y, stand_width, stand_height)
-
-    def increase_jump(self):
-        self.jump_speed -= 10  # Increase jump speed
-
-
 player = GameSprite('ver_idle.png', 100, 400, 5, 100, 100)
-enemy = Enemy('enemy.png', win_width - 100, 400, 3, 100, 100, disabled_time=3000)
+enemy = Enemy('enemy.png', win_width - 100, 400, 3, 100, 100, disabled_time=0)
 
 slashes = pygame.sprite.Group()
-tidehunter = Tidehunter('tidehunter.png', 100, 425, 30, 80)
 
 game = True
 clock = pygame.time.Clock()
@@ -160,7 +158,6 @@ while game:
     enemy.reset()
     slashes.update()
     slashes.draw(window)
-    tidehunter.reset()
 
     for slash in slashes:
         if slash.rect.colliderect(enemy.hitbox):
@@ -168,8 +165,7 @@ while game:
             enemy.disabled_timer = pygame.time.get_ticks()
             slashes.remove(slash)
             if slash.direction == 'down':
-                player.jump_speed -= 10
-                tidehunter.increase_jump()
+                player.jump()  # Perform down jump when enemy is hit with a down slash
 
     pygame.display.update()
     clock.tick(30)
