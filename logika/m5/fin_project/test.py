@@ -3,8 +3,8 @@ from pygame.locals import *
 from pygame.sprite import Sprite
 from pygame.transform import scale, rotate
 from pygame.image import load
-import math
 import random
+import math
 
 pygame.init()
 
@@ -12,6 +12,10 @@ win_width = 700
 win_height = 500
 window = pygame.display.set_mode((win_width, win_height))
 background = scale(load('bg.jpg'), (win_width, win_height))
+
+# Font settings for score display
+font = pygame.font.Font(None, 36)
+score_color = (255, 255, 255)
 
 
 class GameSprite(Sprite):
@@ -29,18 +33,17 @@ class GameSprite(Sprite):
         self.gravity = 0.5
         self.on_ground = True
         self.jump_count = 0
-        self.down_jump_available = False
 
     def reset(self):
         window.blit(self.image, (self.rect.x, self.rect.y))
 
     def jump(self):
         if self.on_ground:
-            self.jump_speed = -10  # Increase jump height
+            self.jump_speed = -10
             self.on_ground = False
             self.jump_count = 1
         elif self.jump_count < 2:
-            self.jump_speed = -7  # Increase jump height
+            self.jump_speed = -10
             self.jump_count += 1
 
     def apply_gravity(self):
@@ -54,13 +57,18 @@ class GameSprite(Sprite):
 
 
 class Enemy(GameSprite):
-    def __init__(self, enemy_image, rect_x, rect_y, enemy_speed, enemy_width, enemy_height, disabled_time):
-        super().__init__(enemy_image, rect_x, rect_y, enemy_speed, enemy_width, enemy_height)
+    def __init__(self, enemy_image, enemy_speed, enemy_width, enemy_height, disabled_time):
+        super().__init__(enemy_image, win_width // 2, win_height - enemy_height, enemy_speed, enemy_width, enemy_height)
         self.disabled_time = disabled_time
         self.disabled_timer = 0
         self.disabled = False
-        self.hitbox = pygame.Rect(rect_x, rect_y, enemy_width, enemy_height)
-        self.initial_y = rect_y  # Store the initial y position for reference
+        self.hitbox = pygame.Rect(self.rect.x, self.rect.y, enemy_width, enemy_height)
+
+    def move_to_middle(self):
+        if self.rect.x < win_width // 2:
+            self.rect.x += self.speed
+        elif self.rect.x > win_width // 2:
+            self.rect.x -= self.speed
 
     def update(self):
         if not self.disabled:
@@ -73,10 +81,7 @@ class Enemy(GameSprite):
                 self.disabled = False
                 self.disabled_timer = 0
 
-        # Add movement pattern here
-        # For example, oscillating movement
-        # You can modify this pattern to fit your game's needs
-        self.rect.y = self.initial_y + 50 * math.sin(pygame.time.get_ticks() / 1000)  # Example of oscillating movement
+        self.rect.y = win_height - self.height  # Keep the enemy at the bottom of the window
 
 
 class Slash(GameSprite):
@@ -112,10 +117,24 @@ class Slash(GameSprite):
             self.kill()
 
 
+class Void(GameSprite):
+    def __init__(self, player_rect, void_image):
+        super().__init__(void_image, player_rect.x, player_rect.y, 0, 50, 50)
+
+
+
 player = GameSprite('ver_idle.png', 100, 400, 5, 100, 100)
-enemy = Enemy('enemy.png', win_width - 100, 400, 3, 100, 100, disabled_time=0)
+enemy = Enemy('enemy.png', 3, 100, 100, disabled_time=0)
 
 slashes = pygame.sprite.Group()
+enemy_slashes = pygame.sprite.Group()
+
+
+
+score = 0  # Initialize the score variable
+hit_count = 0  # Initialize the hit count variable
+cooldown_time = 3000  # Cooldown time in milliseconds
+cooldown_timer = 0  # Cooldown timer variable
 
 game = True
 clock = pygame.time.Clock()
@@ -161,11 +180,28 @@ while game:
 
     for slash in slashes:
         if slash.rect.colliderect(enemy.hitbox):
-            enemy.disabled = True
-            enemy.disabled_timer = pygame.time.get_ticks()
-            slashes.remove(slash)
-            if slash.direction == 'down':
-                player.jump()  # Perform down jump when enemy is hit with a down slash
+            if hit_count < 4:  # Check if hit count is less than 4
+                enemy.disabled = True
+                enemy.disabled_timer = pygame.time.get_ticks()
+                slashes.remove(slash)
+                score += 1  # Increment the score when enemy is hit
+                hit_count += 1  # Increment the hit count
+            elif hit_count == 4:
+                if pygame.time.get_ticks() - cooldown_timer >= cooldown_time:
+                    hit_count = 0  # Reset hit count
+                    cooldown_timer = pygame.time.get_ticks()  # Reset cooldown timer
+
+    enemy.move_to_middle()
+
+    # Render and display the score on the screen
+    score_text = font.render("Score: " + str(score), True, score_color)
+    window.blit(score_text, (10, 10))
+
+    # Cooldown logic
+    if hit_count >= 4:
+        if pygame.time.get_ticks() - cooldown_timer >= cooldown_time:
+            hit_count = 0  # Reset hit count
+            cooldown_timer = pygame.time.get_ticks()
 
     pygame.display.update()
     clock.tick(30)
